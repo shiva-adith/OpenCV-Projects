@@ -3,7 +3,7 @@ import cv2
 # from random import randrange
 
 image_file = "data/elon_test.jpg"
-video_file = "data/smiles.mp4"
+video_file = "data/smiling480p_sample.mp4"
 
 face_detector_file = "data/haarcascade_frontalface_default.xml"
 smile_detector_file = "data/haarcascade_smile.xml"
@@ -43,11 +43,11 @@ while True:
 
         # displaying the text "Smiling" when detected instead of just a rectangle over the smiles.
         if len(smiles) > 0:
-            cv2.rectangle(frame, (x, y+h), (x+100, y+h+40), (0, 255, 0), cv2.FILLED)
-            cv2.putText(frame, "Smiling", (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+            cv2.rectangle(frame, (x-1, y+h), (x+100, y+h+40), (0, 255, 0), cv2.FILLED)
+            cv2.putText(frame, "Smiling", (x+4, y+h+25), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
 
-        # for (x_smile, y_smile, w_smile, h_smile) in smiles:
-        #     cv2.rectangle(face, (x_smile, y_smile), (x_smile + w_smile, y_smile + h_smile), (0, 255, 255), 2)
+        for (x_smile, y_smile, w_smile, h_smile) in smiles:
+            cv2.rectangle(face, (x_smile, y_smile), (x_smile + w_smile, y_smile + h_smile), (0, 255, 255), 2)
 
     cv2.imshow("Smile Detection", frame)
     key = cv2.waitKey(1)

@@ -3,7 +3,7 @@ from random import randrange
 
 # img_file = "data/cars_and_pedestrians.jpg"
 # video_file = "data/tesla_dashcam.mp4"
-video_file = "data/sample2.mp4"
+video_file = "data/vehicle_sample480p.mp4"
 
 car_classifier_file = "data/car_detector.xml"
 pedestrian_classifier_file = "data/haarcascade_fullbody.xml"
@@ -29,11 +29,11 @@ while True:
         # Drawing two rectangles over cars just for visual purposes - no functional operation
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
         cv2.rectangle(frame, (x+1, y+1), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(frame, "Vehicle", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.putText(frame, "Vehicle", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     for (x, y, w, h) in pedestrian_detector:
         cv2.rectangle(frame, (x, y), (x+w, y+h), (randrange(256), randrange(256), randrange(256)), 2)
-        cv2.putText(frame, "Pedestrian", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+        cv2.putText(frame, "Pedestrian", (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
 
     cv2.imshow("Vehicle and Pedestrian Detection", frame)
     key = cv2.waitKey(1)

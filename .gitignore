@@ -1,6 +1,5 @@
 # Ignore data files
 data
-results
 
 # Ignore Pycharm files
 .idea
