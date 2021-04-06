@@ -3,3 +3,7 @@ data
 
 # Ignore Pycharm files
 .idea
+
+# Ignore weights and configuration files
+yolov3.cfg
+yolov3.weights
