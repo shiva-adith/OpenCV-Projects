@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-image_file = "../data/yolo_images/testing/scene2.jpg"
+image_file = "../data/yolo_images/testing/scene3.jpg"
 configuration_file = "yolov3.cfg"
 weights_file = "yolov3.weights"
 img = cv2.imread(image_file)
@@ -25,6 +25,10 @@ class_labels = ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "tr
                 "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse",
                 "remote", "keyboard", "cellphone", "microwave", "oven", "toaster", "sink", "refrigerator",
                 "book", "clock", "vase", "scissors", "teddybear", "hairdrier", "toothbrush"]
+
+class_id_list = []
+bboxes_list = []  # bounding boxes list
+confidence_list = []
 
 # setting five different colours used for drawing rectangles around detected objects.
 class_colours = ['255,0,0', '0,255,0', '0,0,255', '255,255,0', '0,255,255']
@@ -54,7 +58,7 @@ model.setInput(img_blob)
 object_detection = model.forward(output_layer)
 
 for layer in object_detection:
-    # looping through all the detected objects in each layer
+    # looping through all the detected objects in each layer(including multiple detections for same object)
     for detection in layer:
         # detection[1 to 4] provide coordinates for the rectangle around the detected object(s)
         # detection[5:] provides the scores for all objects within the box from above.
@@ -75,37 +79,58 @@ for layer in object_detection:
 
             # obtain rectangle coordinates and resize to actual image size. (img was resized during blob conversion)
             # detection[:4] provides four coordinates and each of them are upscaled back to img size.
-            bounding_box = detection[:4] * np.array([img_width, img_height, img_width, img_height])
+            bboxes = detection[:4] * np.array([img_width, img_height, img_width, img_height])
             # test: print(type(bounding_box))
 
-            # converting numpy array of x,y, width and height to int
-            (x, y, w, h) = bounding_box.astype('int')
+            # converting numpy array of mid points x and y, width and height to int
+            (centre_x, centre_y, w, h) = bboxes.astype('int')
 
             # obtain coordinates for the rectangle
-            start_x = int(x - (w/2))
-            start_y = int(y - (h/2))
-            end_x = start_x + w
-            end_y = start_y + h
+            start_x = int(centre_x - (w/2))
+            start_y = int(centre_y - (h/2))
 
-            # obtain a colour for the box
-            box_colour = class_colours[int(predicted_class_id)]
+            # keeping track of the multiple detections of the same object in each layer
+            class_id_list.append(predicted_class_id)
+            bboxes_list.append([start_x, start_y, int(w), int(h)])
+            confidence_list.append(float(prediction_confidence))
 
-            # convert numpy array of colours into list
-            box_colour = [int(colour) for colour in box_colour]
 
-            # print prediction label and corresponding confidence %
-            print(f"Prediction: {predicted_class_label}, {prediction_confidence*100:.2f}")
+# Performing NMS (Non Maximum Suppression) to eliminate multiple detections of the same object - ie. suppress
+# non maximum overlapping bounding boxes
 
-            # draw rectangle and display text
-            cv2.rectangle(img, (start_x, start_y), (end_x, end_y), box_colour, 1)
-            cv2.putText(img, predicted_class_label, (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, box_colour, 1)
+# Recommended values for non maxima suppression confidence and max_suppression threshold are 0.5 and 0.4 resp.
+# returns a list of ids for detected objects sorted from max value to min(for each object).
+max_value_ids = cv2.dnn.NMSBoxes(bboxes_list, confidence_list, score_threshold=0.5, nms_threshold=0.4)
+
+# to single out the detection with the highest confidence %
+for id in max_value_ids:
+    max_class_id = id[0]  # the first element of the sorted list gives the max class id for that object.
+    bbox = bboxes_list[max_class_id]  # obtain the bounding box of the corresponding max_class_id
+    x, y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]  # obtain dimensions of the above bbox
+
+    predicted_class_id = class_id_list[max_class_id]
+    predicted_class_label = class_labels[int(predicted_class_id)]
+    prediction_confidence = confidence_list[max_class_id]
+
+    end_x = x + w
+    end_y = y + h
+
+    # obtain a colour for the bounding boxes
+    bbox_colour = class_colours[int(predicted_class_id)]
+
+    # convert numpy array of colours into list
+    bbox_colour = [int(colour) for colour in bbox_colour]
+
+    # print prediction label and corresponding confidence %
+    print(f"Prediction: {predicted_class_label}, {prediction_confidence*100:.2f}")
+
+    # draw rectangle and display text withing a filled rectangle (according to text size)
+    label_size = cv2.getTextSize(predicted_class_label, cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, thickness=1)
+    cv2.rectangle(img, (x, y), (x+label_size[0][0], y-int(label_size[0][1])-4), bbox_colour, cv2.FILLED)
+    cv2.rectangle(img, (x, y), (end_x, end_y), bbox_colour, 1)
+    cv2.putText(img, predicted_class_label, (x, y-5), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
+
 
 cv2.imshow("Object Detection using YOLO", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-
-
-
-
