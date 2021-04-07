@@ -36,6 +36,7 @@ video = cv2.VideoCapture(video_file)
 while True:
     successful_read, frame = video.read()
 
+    # break if video ends or no video was detected.
     if not successful_read:
         break
 

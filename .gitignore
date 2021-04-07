@@ -7,3 +7,4 @@ data
 # Ignore weights and configuration files
 yolov3.cfg
 yolov3.weights
+/yolo_darknet/yolov4/darknet/yolov4.conv.137
