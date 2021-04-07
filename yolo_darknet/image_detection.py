@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import ImageFont
 
 image_file = "../data/yolo_images/testing/scene3.jpg"
 configuration_file = "yolov3.cfg"
@@ -7,6 +8,8 @@ weights_file = "yolov3.weights"
 img = cv2.imread(image_file)
 img_height = img.shape[0]
 img_width = img.shape[1]
+
+font = ImageFont.truetype(font="arial.ttf", size=20)
 
 # the image is converted into a blob - a format of images stored in database
 # recommended values(for yolo) for scalefactor, width and height are 0.003922(=1/255), 320, 320.
@@ -55,9 +58,9 @@ output_layer = [model_layers[layer[0]-1] for layer in model.getUnconnectedOutLay
 model.setInput(img_blob)
 # passes the blob through the network till the output layer, and returns the outputs for each layer.
 # each layer produces multiple detections.
-object_detection = model.forward(output_layer)
+predictions = model.forward(output_layer)
 
-for layer in object_detection:
+for layer in predictions:
     # looping through all the detected objects in each layer(including multiple detections for same object)
     for detection in layer:
         # detection[1 to 4] provide coordinates for the rectangle around the detected object(s)
@@ -110,6 +113,7 @@ for id in max_value_ids:
 
     predicted_class_id = class_id_list[max_class_id]
     predicted_class_label = class_labels[int(predicted_class_id)]
+    # test: print(type(predicted_class_label))
     prediction_confidence = confidence_list[max_class_id]
 
     end_x = x + w
@@ -125,10 +129,10 @@ for id in max_value_ids:
     print(f"Prediction: {predicted_class_label}, {prediction_confidence*100:.2f}")
 
     # draw rectangle and display text withing a filled rectangle (according to text size)
-    label_size = cv2.getTextSize(predicted_class_label, cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, thickness=1)
+    label_size = cv2.getTextSize(predicted_class_label, cv2.FONT_HERSHEY_TRIPLEX, fontScale=0.5, thickness=1)
     cv2.rectangle(img, (x, y), (x+label_size[0][0], y-int(label_size[0][1])-4), bbox_colour, cv2.FILLED)
     cv2.rectangle(img, (x, y), (end_x, end_y), bbox_colour, 1)
-    cv2.putText(img, predicted_class_label, (x, y-5), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
+    cv2.putText(img, predicted_class_label.capitalize(), (x, y-5), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 0), 1)
 
 
 cv2.imshow("Object Detection using YOLO", img)
