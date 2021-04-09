@@ -220,3 +220,7 @@ yolov3.weights
 /yolo_darknet/yolov4/darknet/include/yolo_v2_class.hpp
 /yolo_darknet/yolov4/darknet/.github/
 /yolo_darknet/yolov4/darknet/.git
+/yolo_darknet/convert2Yolo/
+/yolo_darknet/yolov4/darknet/traffic_data/traffic_images/
+/yolo_darknet/yolov4/darknet/traffic_data/
+/yolo_darknet/xml_rename.py
