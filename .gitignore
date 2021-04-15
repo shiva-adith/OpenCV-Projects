@@ -223,4 +223,5 @@ yolov3.weights
 /yolo_darknet/convert2Yolo/
 /yolo_darknet/yolov4/darknet/traffic_data/traffic_images/
 /yolo_darknet/yolov4/darknet/traffic_data/
-/yolo_darknet/xml_rename.py
+
+/yolo_darknet/OIDv4_ToolKit/
