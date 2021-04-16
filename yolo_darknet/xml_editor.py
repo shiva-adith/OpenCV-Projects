@@ -5,26 +5,35 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 
-path = "./yolov4/darknet/traffic_data/traffic_labels/"
 images_folder = 'traffic_images'
 
 
 # Rename xml files
-def rename_file():
-    # path = getattr(parsed_args, 'input')
-    if not os.path.isdir(path):
+def rename_file(filepath):
+    # print(filepath)
+
+    if not os.path.isdir(filepath):
         print("The specified path does not exist!")
         sys.exit()
 
-    for i, file in enumerate(glob.iglob(path + "*.xml")):
+    for i, file in enumerate(glob.iglob(filepath + "*.xml")):
         # os.remove(file)
-        if not os.path.exists(file):
-            os.rename(file, os.path.join(path, f"{str(i)}.xml"))
+        if os.path.exists(file):
+            os.rename(file, os.path.join(filepath, f"{str(i)}.xml"))
+            # print("success")
+        else:
+            print("Does not exist")
 
 
 # Edit filename within XML tags in the file.
-def edit_content():
-    # path = getattr(parsed_args, 'input')
+def edit_content(path):
+
+    # test = args.split()
+    # print(test)
+    # path = args[0]
+    # print(path)
+    # images_folder = args[1]
+
     if not os.path.isdir(path):
         print("The specified path does not exist!")
         sys.exit()
@@ -39,44 +48,32 @@ def edit_content():
 
         folder = root.find('folder')
         folder.text = f"{images_folder}"
+        # folder.text = "test"
 
-        tree.write(path+f"{str(i)}.xml")
+        tree.write(file)
 
     print(f"Conversion took: {round(time.process_time() - start_time, 3)} seconds")
-
-
-# def validate_path(path):
-#     if not os.path.exists(path):
-#         raise argparse.ArgumentTypeError(f"{path} does not exit")
-#     return path
-
-# FUNCTION_MAP = {'r': rename_file(),
-#                 'e': edit_content()}
 
 
 my_parser = argparse.ArgumentParser(prog="xml_editor", description="Rename or Edit Contents of an XML file")
 
 my_parser.add_argument('--rename',
-                       dest='action',
-                       action='store_const',
-                       const=rename_file(),
-                       help="specify the function to use")
+                       type=rename_file,
+                       dest='PATH',
+                       help="specify the path")
 
 my_parser.add_argument('--edit',
-                       dest='action',
-                       action='store_const',
-                       const=edit_content(),
-                       help="specify the function to use")
+                       action='store',
+                       nargs="+",
+                       type=edit_content,
+                       dest='PATH, FOLDER',
+                       help="specify the path")
 
 # my_parser.add_argument('-i',
-#                        '--input',
-#                        required=True,
-#                        help='path to files')
+#                        '--images',
+#                        action='store_const',
+#                        type=str,
+#                        help='Images folder name')
+
 
 parsed_args = my_parser.parse_args()
-
-# if parsed_args.action is None:
-#     my_parser.parse_args(['-h'])
-# parsed_args.action(parsed_args)
-
-# func = FUNCTION_MAP[args.command]()
